@@ -21,6 +21,42 @@ const SERVICE_OPTIONS = [
   "OTHER SERVICE"
 ];
 
+const INTENT_COPY: Record<string, { title: string; subtitle: string; leadType: string; placeholder: string }> = {
+  LOAN: {
+    title: 'Loan Callback',
+    subtitle: 'Tell us which Toyota you are considering. Our finance desk will call you.',
+    leadType: 'LOAN',
+    placeholder: 'MODEL',
+  },
+  INSURANCE: {
+    title: 'Insurance Callback',
+    subtitle: 'Share your details for new vehicle insurance, renewal, or claim guidance.',
+    leadType: 'INSURANCE',
+    placeholder: 'MODEL / POLICY NEED',
+  },
+  FEEDBACK: {
+    title: 'Feedback',
+    subtitle: 'Share a sales, service, or ownership note with the Nippon Toyota team.',
+    leadType: 'FEEDBACK',
+    placeholder: 'FEEDBACK TYPE',
+  },
+  CAREERS: {
+    title: 'Career Enquiry',
+    subtitle: 'Register your interest for sales, service, technician, or support roles.',
+    leadType: 'CAREERS',
+    placeholder: 'ROLE INTEREST',
+  },
+  PROMOTION: {
+    title: 'Offer Callback',
+    subtitle: 'Ask the sales team about current offers, finance bundles, and exchange benefits.',
+    leadType: 'PROMOTION',
+    placeholder: 'MODEL / OFFER',
+  },
+};
+
+const FEEDBACK_OPTIONS = ['SALES FEEDBACK', 'SERVICE FEEDBACK', 'DELIVERY EXPERIENCE', 'GENERAL FEEDBACK'];
+const CAREER_OPTIONS = ['SALES CONSULTANT', 'SERVICE ADVISOR', 'TECHNICIAN', 'CUSTOMER CARE', 'BACK OFFICE'];
+
 interface LeadCaptureFormProps {
   onSuccess?: () => void;
   standalone?: boolean;
@@ -32,6 +68,7 @@ export default function LeadCaptureForm({ onSuccess, standalone = false }: LeadC
   const [formData, setFormData] = useState({ name: '', phone: '', model: prefilledModel || '' });
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const intentCopy = INTENT_COPY[intent];
 
   if (intent === 'TEST_DRIVE' && !standalone) {
     return (
@@ -78,7 +115,7 @@ export default function LeadCaptureForm({ onSuccess, standalone = false }: LeadC
 
     try {
       const payload = {
-        leadType: inquiryType,
+        leadType: intentCopy?.leadType || inquiryType,
         name: formData.name,
         phone: formData.phone,
         targetCar: formData.model || '-',
@@ -147,13 +184,13 @@ export default function LeadCaptureForm({ onSuccess, standalone = false }: LeadC
           >
             {!standalone && (
               <div className="text-center mb-8">
-                <h3 className="font-druk text-3xl text-white uppercase tracking-wider">Request Callback</h3>
-                <p className="text-white/70 font-light text-sm mt-2">Connect with our Toyota specialists today.</p>
+                <h3 className="font-druk text-3xl text-white uppercase tracking-wider">{intentCopy?.title || 'Request Callback'}</h3>
+                <p className="text-white/70 font-light text-sm mt-2">{intentCopy?.subtitle || 'Connect with our Toyota specialists today.'}</p>
               </div>
             )}
 
             {/* Inquiry Type Toggle */}
-            <div className="flex space-x-12 mb-8 border-b border-white/20">
+            {!intentCopy && <div className="flex space-x-12 mb-8 border-b border-white/20">
               <button
                 type="button"
                 onClick={() => {
@@ -184,7 +221,7 @@ export default function LeadCaptureForm({ onSuccess, standalone = false }: LeadC
                   <motion.div layoutId="underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#eb0a1e]" />
                 )}
               </button>
-            </div>
+            </div>}
             
             {/* Name Input */}
             <div className="relative mt-4">
@@ -228,7 +265,7 @@ export default function LeadCaptureForm({ onSuccess, standalone = false }: LeadC
                 }`}
               >
                 <span className={`text-2xl md:text-3xl font-druk uppercase tracking-wider ${formData.model ? 'text-white' : 'text-white/60'}`}>
-                  {formData.model || (inquiryType === 'SALES' ? "MODEL" : "SERVICE TYPE")}
+                  {formData.model || intentCopy?.placeholder || (inquiryType === 'SALES' ? "MODEL" : "SERVICE TYPE")}
                 </span>
                 <motion.div 
                   animate={{ rotate: isDropdownOpen ? 180 : 0 }} 
@@ -255,7 +292,7 @@ export default function LeadCaptureForm({ onSuccess, standalone = false }: LeadC
                     className="absolute left-0 right-0 bottom-[100%] mb-2 bg-[#111] border border-white/10 rounded-sm shadow-2xl z-50 overflow-hidden"
                   >
                     <div className="max-h-[280px] overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-white/40 [&::-webkit-scrollbar-track]:bg-transparent">
-                      {(inquiryType === 'SALES' ? TOYOTA_MODELS : SERVICE_OPTIONS).map(model => (
+                      {(intent === 'FEEDBACK' ? FEEDBACK_OPTIONS : intent === 'CAREERS' ? CAREER_OPTIONS : inquiryType === 'SALES' ? TOYOTA_MODELS : SERVICE_OPTIONS).map(model => (
                         <div
                           key={model}
                           onClick={() => {

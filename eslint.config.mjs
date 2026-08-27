@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "public/desktop-showroom.js",
+    "public/assets/toyota-360/js/*.js",
   ]),
 ]);
 

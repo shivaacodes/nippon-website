@@ -5,10 +5,12 @@ import { ChevronLeft, X, Download } from 'lucide-react';
 import { useLeadStore } from '@/store/useLeadStore';
 import { cars } from './Vehicles';
 
+type VehicleSummary = (typeof cars)[number];
+
 export default function BrochurePipeline() {
   const { closeModal } = useLeadStore();
   const [step, setStep] = useState(1);
-  const [selectedCar, setSelectedCar] = useState<any>(null);
+  const [selectedCar, setSelectedCar] = useState<VehicleSummary | null>(null);
   const [direction, setDirection] = useState(1);
 
   const variants = {

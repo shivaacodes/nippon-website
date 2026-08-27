@@ -1,249 +1,221 @@
 "use client";
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Clock, Phone, Mail, ChevronDown, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { contactBranches, type ContactBranch } from '@/data/contactBranches';
 
-const locations = [
-  "KALAMASSERY P.O., COCHIN - SHOWROOM & SERVICE CENTER",
-  "NETTOOR P.O., COCHIN - SHOWROOM & SERVICE CENTER",
-  "TRIVANDRUM - SHOWROOM & SERVICE CENTER",
-  "TRIVANDRUM - SERVICE CENTER",
-  "TRIVANDRUM - SHOWROOM",
-  "TRIVANDRUM - SERVICE & BODY & PAINT",
-  "THRISSUR - SHOWROOM & SERVICE CENTER",
-  "NADATHARA P.O., THRISSUR - SERVICE CENTER",
-  "ARTHAT P.O., THRISSUR - SERVICE CENTER",
-  "KOTTAYAM - SHOWROOM & SERVICE CENTER",
-  "KOTTAYAM - SERVICE CENTER",
-  "KOTTAYAM - SHOWROOM",
-  "KOLLAM - SHOWROOM & SERVICE CENTER",
-  "KOLLAM - SERVICE CENTER",
-  "THIRUVALLA - SHOWROOM & SERVICE CENTER",
-  "IRINJALKUDA - SHOWROOM & SERVICE CENTER",
-  "MUVATTUPUZHA - SHOWROOM & SERVICE CENTER",
-  "KAYAMKULLAM - SHOWROOM & SERVICE CENTER",
-  "PATHANAMTHITTA - SHOWROOM & SERVICE CENTER",
-  "ERNAKULAM, KOCHI - SERVICE CENTER"
-];
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" as const } }
-};
-
-export default function ContactContent() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState(locations[0]);
-
-  const [city, type] = selectedLocation.split(" - ");
-
+function DetailBlock({
+  icon,
+  alt,
+  title,
+  children,
+  redTitle = false,
+}: {
+  icon: string;
+  alt: string;
+  title: string;
+  children: React.ReactNode;
+  redTitle?: boolean;
+}) {
   return (
-    <div className="bg-white min-h-screen">
-      
-      {/* Hero Section */}
-      <div className="relative h-[50vh] min-h-[450px] w-full bg-zinc-900">
-        <Image 
-          src="/nippon-towers.jpg" 
-          alt="Nippon Toyota Locations" 
-          fill sizes="100vw"
-          className="object-cover opacity-60 object-center mix-blend-overlay"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-        
-        <div className="absolute bottom-0 left-0 w-full">
-          <div className="max-w-[1400px] mx-auto px-6 md:px-12 pb-16">
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-              className="text-[#eb0a1e] font-bold tracking-[0.2em] uppercase text-[11px] mb-4"
-            >
-              Get in Touch
-            </motion.p>
-            <motion.h1 
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="text-5xl md:text-7xl lg:text-8xl font-druk text-white tracking-tight uppercase"
-            >
-              Locations
-            </motion.h1>
-          </div>
-        </div>
+    <div className="flex min-h-[220px] gap-7 border-b border-[#e7e7e7] px-3 py-10 md:px-8">
+      <div className="relative mt-1 h-14 w-14 shrink-0">
+        <Image src={icon} alt={alt} fill sizes="56px" className="object-contain" />
+      </div>
+      <div className="text-[#555]">
+        <h3 className={`mb-5 font-display text-[18px] font-bold uppercase tracking-wide ${redTitle ? 'text-[#eb0a1e]' : 'text-[#222]'}`}>
+          {title}
+        </h3>
+        <div className="space-y-1 text-[15px] leading-7">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function PhoneLink({ number }: { number: string }) {
+  return (
+    <a href={`tel:${number.replace(/[^\d+]/g, '')}`} className="ml-2 text-[#444] transition-colors hover:text-[#eb0a1e]">
+      {number}
+    </a>
+  );
+}
+
+function BranchDetails({ branch }: { branch: ContactBranch }) {
+  return (
+    <section id="adress" className="mx-auto max-w-[1180px] px-4 py-8 md:py-14">
+      <div className="grid grid-cols-1 md:grid-cols-2">
+        <DetailBlock icon="/images/common/contact-4.png" alt="Address" title="NIPPON TOYOTA" redTitle>
+          {branch.address.map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+        </DetailBlock>
+
+        <DetailBlock icon="/images/common/contact-1.png" alt="Working Hours" title="Working Hours">
+          {branch.salesHours && (
+            <p>
+              <strong className="mr-2 text-[#222]">Sales</strong>
+              <span>{branch.salesHours}</span>
+            </p>
+          )}
+          {branch.serviceHours && (
+            <p>
+              <strong className="mr-2 text-[#222]">Service</strong>
+              <span>{branch.serviceHours}</span>
+            </p>
+          )}
+          <p>
+            <strong className="mr-2 text-[#222]">Lunch</strong>
+            <span>{branch.lunchHours}</span>
+          </p>
+        </DetailBlock>
+
+        <DetailBlock icon="/images/common/contact-3.png" alt="Contact Numbers" title="Contact Numbers">
+          {branch.phone.length > 0 && (
+            <p>
+              <strong className="mr-2 text-[#222]">Phone</strong>
+              {branch.phone.map((number) => (
+                <span key={number} className="block sm:inline">
+                  <PhoneLink number={number} />
+                </span>
+              ))}
+            </p>
+          )}
+          {branch.fax && (
+            <p>
+              <strong className="mr-2 text-[#222]">Fax</strong>
+              <PhoneLink number={branch.fax} />
+            </p>
+          )}
+          {branch.service.length > 0 && (
+            <p>
+              <strong className="mr-2 text-[#222]">Service</strong>
+              {branch.service.map((number) => (
+                <span key={number} className="block sm:inline">
+                  <PhoneLink number={number} />
+                </span>
+              ))}
+            </p>
+          )}
+          {branch.serviceHelpline && (
+            <p>
+              <strong className="mr-2 text-[#222]">Service Helpline</strong>
+              <PhoneLink number={branch.serviceHelpline} />
+            </p>
+          )}
+          <p>
+            <strong className="mr-2 text-[#222]">Roadside Assistance</strong>
+            <PhoneLink number="1800 102 5001" />
+          </p>
+        </DetailBlock>
+
+        <DetailBlock icon="/images/common/contact-2.png" alt="Email" title="Email">
+          <p>
+            <a href={`mailto:${branch.email}`} className="break-all text-[#444] transition-colors hover:text-[#eb0a1e]">
+              {branch.email}
+            </a>
+          </p>
+        </DetailBlock>
       </div>
 
-      {/* Main Content Area */}
-      <section className="py-24 md:py-32 px-6 md:px-12 max-w-[1400px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24">
-          
-          {/* Left Column: Branch Selection */}
-          <motion.div 
-            className="lg:col-span-5 relative"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeUp}
-          >
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-zinc-900 mb-8">
-              Select Branch
-            </h2>
-            
-            {/* Custom Dropdown Trigger */}
-            <div 
-              className="relative group cursor-pointer border-b-2 border-zinc-900 pb-4 mb-12"
-              onClick={() => setIsOpen(!isOpen)}
+      <div className="py-8 text-center text-[15px] text-[#777]">
+        <span>Check other branches</span>
+        <a href="#branch-select" className="ml-1 font-semibold text-[#eb0a1e] hover:underline">
+          here.
+        </a>
+      </div>
+    </section>
+  );
+}
+
+function SimpleCard({ title, text }: { title: string; text: string }) {
+  return (
+    <div className="bg-white px-7 py-8 text-center shadow-[0_1px_0_rgba(0,0,0,0.08)]">
+      <h3 className="font-display text-[15px] font-bold uppercase tracking-[0.12em] text-[#222]">{title}</h3>
+      <p className="mt-3 text-sm leading-6 text-[#666]">{text}</p>
+    </div>
+  );
+}
+
+export default function ContactContent() {
+  const [selectedCode, setSelectedCode] = useState(contactBranches[0].code);
+  const selectedBranch = useMemo(
+    () => contactBranches.find((branch) => branch.code === selectedCode) ?? contactBranches[0],
+    [selectedCode],
+  );
+
+  return (
+    <div className="bg-white text-[#333]">
+      <section className="contact-us-sec pt-12 md:pt-16">
+        <div className="mx-auto max-w-[1180px] px-4">
+          <div className="mx-auto w-full max-w-[331px] border-b-4 border-[#eb0a1e] pb-5 text-center">
+            <h1 className="font-display text-[32px] font-bold uppercase tracking-tight text-[#333]">Our Locations</h1>
+            <h5 className="mt-2 text-[14px] font-normal text-[#777]">Select Our Dealer Nearest to you</h5>
+          </div>
+
+          <div id="branch-select" className="mx-auto mt-12 max-w-[620px]">
+            <select
+              value={selectedCode}
+              onChange={(event) => setSelectedCode(event.target.value)}
+              className="h-[46px] w-full border border-[#d5d5d5] bg-white px-4 text-[14px] text-[#555] outline-none transition-colors focus:border-[#eb0a1e]"
             >
-              <div className="flex justify-between items-center">
-                <span className="text-lg md:text-xl font-medium text-zinc-900 uppercase tracking-wide">
-                  {city}
-                </span>
-                <motion.div
-                  animate={{ rotate: isOpen ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <ChevronDown size={24} className={`transition-colors ${isOpen ? 'text-[#eb0a1e]' : 'text-zinc-400 group-hover:text-[#eb0a1e]'}`} />
-                </motion.div>
-              </div>
-              <p className="text-[11px] font-bold tracking-widest text-gray-400 uppercase mt-2">
-                {type}
-              </p>
-            </div>
-
-            {/* Custom Dropdown Menu */}
-            <AnimatePresence>
-              {isOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                  className="absolute top-[140px] left-0 w-full bg-white shadow-2xl border border-gray-100 max-h-[350px] overflow-y-auto z-50 rounded-b-md"
-                >
-                  {locations.map((loc, idx) => (
-                    <div 
-                      key={idx}
-                      onClick={() => {
-                        setSelectedLocation(loc);
-                        setIsOpen(false);
-                      }}
-                      className="px-6 py-4 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors"
-                    >
-                      <span className="block text-[13px] font-bold text-zinc-800 uppercase tracking-wide">
-                        {loc.split(" - ")[0]}
-                      </span>
-                      <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-                        {loc.split(" - ")[1]}
-                      </span>
-                    </div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <a href="#" className="inline-flex items-center text-[12px] font-bold tracking-[0.15em] uppercase text-zinc-900 hover:text-[#eb0a1e] transition-colors group">
-              View All Locations
-              <ArrowRight size={16} className="ml-2 transform group-hover:translate-x-1 transition-transform" />
-            </a>
-          </motion.div>
-
-          {/* Right Column: Contact Details */}
-          <motion.div 
-            className="lg:col-span-7"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeUp}
-          >
-            <div className="flex flex-col space-y-12">
-              
-              {/* Address */}
-              <div className="border-b border-gray-100 pb-12">
-                <div className="flex items-center mb-4 text-gray-400">
-                  <MapPin size={16} className="mr-2" />
-                  <span className="text-[11px] font-bold tracking-[0.2em] uppercase">Address</span>
-                </div>
-                <h3 className="text-2xl md:text-3xl text-zinc-900 font-medium leading-[1.4] tracking-tight">
-                  X1X/9C, Nippon Towers, <br />
-                  NH 47, HMT Junction, <br />
-                  {city}, <br />
-                  Kerala
-                </h3>
-              </div>
-
-              {/* Hours Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 border-b border-gray-100 pb-12">
-                <div>
-                  <div className="flex items-center mb-4 text-gray-400">
-                    <Clock size={16} className="mr-2" />
-                    <span className="text-[11px] font-bold tracking-[0.2em] uppercase">Sales Hours</span>
-                  </div>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-lg font-medium text-zinc-900">09:00 AM - 07:00 PM</p>
-                      <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mt-1">All days open</p>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex items-center mb-4 text-gray-400">
-                    <Clock size={16} className="mr-2" />
-                    <span className="text-[11px] font-bold tracking-[0.2em] uppercase">Service Hours</span>
-                  </div>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-lg font-medium text-zinc-900">09:00 AM - 06:00 PM</p>
-                      <p className="text-[11px] font-bold uppercase tracking-widest text-[#eb0a1e] mt-1">Sunday Holiday</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Contact Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pb-12">
-                <div>
-                  <div className="flex items-center mb-4 text-gray-400">
-                    <Phone size={16} className="mr-2" />
-                    <span className="text-[11px] font-bold tracking-[0.2em] uppercase">Phone</span>
-                  </div>
-                  <div className="space-y-3">
-                    <a href="tel:+914847170000" className="block text-xl font-medium text-zinc-900 hover:text-[#eb0a1e] transition-colors">
-                      +91 48471 70000
-                    </a>
-                    <a href="tel:+919744712345" className="block text-xl font-medium text-zinc-900 hover:text-[#eb0a1e] transition-colors">
-                      +91 97447 12345
-                    </a>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex items-center mb-4 text-gray-400">
-                    <Mail size={16} className="mr-2" />
-                    <span className="text-[11px] font-bold tracking-[0.2em] uppercase">Email</span>
-                  </div>
-                  <a href="mailto:salesinfo@nippontoyota.com" className="block text-xl font-medium text-zinc-900 hover:text-[#eb0a1e] transition-colors break-all">
-                    salesinfo@nippontoyota.com
-                  </a>
-                </div>
-              </div>
-
-            </div>
-          </motion.div>
+              {contactBranches.map((branch) => (
+                <option key={branch.code} value={branch.code}>
+                  {branch.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </section>
 
-      {/* Map Section */}
-      <section className="w-full h-[50vh] min-h-[400px] bg-zinc-100 relative grayscale hover:grayscale-0 transition-all duration-700">
-        <iframe 
-          src={`https://maps.google.com/maps?q=Nippon+Toyota+${encodeURIComponent(city)}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
-          className="absolute inset-0 w-full h-full border-0"
-          allowFullScreen={false}
+      <section className="mt-12 w-full">
+        <div className="relative h-[300px] w-full overflow-hidden bg-[#eee] md:h-[520px]">
+          <Image
+            key={selectedBranch.image}
+            src={selectedBranch.image}
+            alt={`${selectedBranch.title} showroom`}
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority
+          />
+        </div>
+      </section>
+
+      <BranchDetails branch={selectedBranch} />
+
+      <section className="h-[430px] w-full bg-[#e9efef]">
+        <iframe
+          key={selectedBranch.code}
+          src={`https://maps.google.com/maps?q=${encodeURIComponent(selectedBranch.mapQuery)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+          className="h-full w-full border-0"
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
         />
       </section>
 
+      <section className="bg-[#f5f5f5] px-4 pb-10 pt-14">
+        <div className="mx-auto max-w-[1180px]">
+          <h1 className="mb-10 text-center font-display text-[30px] font-bold uppercase text-[#333]">Contact Person</h1>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+            <SimpleCard title="Sales Enquiry" text="Reach the sales desk for new vehicle enquiries, finance support and test drive requests." />
+            <SimpleCard title="Service Support" text="Contact the service team for appointments, repair status and periodic maintenance help." />
+            <SimpleCard title={selectedBranch.type} text={`Selected branch: ${selectedBranch.title}. Use the phone numbers above for direct assistance.`} />
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[#f5f5f5] px-4 pb-16 pt-8">
+        <div className="mx-auto max-w-[1180px]">
+          <h1 className="mb-10 text-center font-display text-[30px] font-bold uppercase text-[#333]">Facilities</h1>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-4">
+            <SimpleCard title="Showroom" text="Toyota vehicle display and consultant support." />
+            <SimpleCard title="Service" text="Scheduled service, diagnosis and maintenance." />
+            <SimpleCard title="Body & Paint" text="Accident repair and paint support where available." />
+            <SimpleCard title="Customer Lounge" text="Waiting area support during showroom and service visits." />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

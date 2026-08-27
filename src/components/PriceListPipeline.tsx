@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { ChevronLeft, X, Download } from 'lucide-react';
+import { ChevronLeft, X } from 'lucide-react';
 import { useLeadStore } from '@/store/useLeadStore';
 import { cars } from './Vehicles';
+
+type VehicleSummary = (typeof cars)[number];
 
 export default function PriceListPipeline() {
   const { closeModal } = useLeadStore();
   const [step, setStep] = useState(1);
-  const [selectedCar, setSelectedCar] = useState<any>(null);
+  const [selectedCar, setSelectedCar] = useState<VehicleSummary | null>(null);
   const [direction, setDirection] = useState(1);
 
   const variants = {

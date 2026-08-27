@@ -20,7 +20,7 @@ export default function Header() {
   const moreDropdownItems = [
     { label: 'Apply for Loan', href: '/loan' },
     { label: 'Apply for Insurance', href: '/insurance' },
-    { label: 'Promotions', href: '/promotions', hasSub: true },
+    { label: 'Promotions', href: '/promotions' },
     { label: 'Whats New', href: '/whats-new' },
     { label: 'Feedback', href: '/feedback' },
     { label: 'Testimonials', href: '/testimonials' },
@@ -110,7 +110,6 @@ export default function Header() {
                     className="w-full px-4 py-2.5 rounded-xl text-[14px] font-medium text-gray-700 hover:text-black hover:bg-gray-50 transition-all duration-200 flex justify-between items-center group/item"
                   >
                     {item.label}
-                    {item.hasSub && <ChevronRight size={14} className="text-gray-400 group-hover/item:text-black transition-colors" />}
                   </Link>
                 ))}
               </div>
@@ -153,9 +152,19 @@ export default function Header() {
               <Link href="/virtual-showroom" onClick={() => setIsMobileMenuOpen(false)} className={getLinkClass('/virtual-showroom')}>
                 VIRTUAL SHOWROOM
               </Link>
-              <Link href="/service" onClick={() => setIsMobileMenuOpen(false)} className={getLinkClass('/service')}>
-                SERVICE
-              </Link>
+              <div>
+                <Link href="/service" onClick={() => setIsMobileMenuOpen(false)} className={getLinkClass('/service')}>
+                  SERVICE
+                </Link>
+                <div className="mt-4 flex flex-col space-y-4 font-sans font-medium text-base tracking-normal normal-case">
+                  <Link href="/service" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-500 hover:text-[var(--toyota-red)] transition-colors">
+                    Service Corner
+                  </Link>
+                  <Link href="/i-connect" onClick={() => setIsMobileMenuOpen(false)} className="text-gray-500 hover:text-[var(--toyota-red)] transition-colors">
+                    Toyota i-Connect
+                  </Link>
+                </div>
+              </div>
               <Link href="/t-care" onClick={() => setIsMobileMenuOpen(false)} className={getLinkClass('/t-care')}>
                 T-CARE
               </Link>

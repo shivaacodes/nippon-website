@@ -12,6 +12,7 @@
   --foreground: #171717;
   --toyota-red: #ea0207;
   --toyota-dark: #333333;
+  color-scheme: dark;
 }
 
 body {

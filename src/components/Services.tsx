@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const services = [
   { 
@@ -11,6 +12,7 @@ const services = [
     subtitle: "Unmatched Quality & Care", 
     desc: "Experience legendary Toyota reliability. Our master technicians use cutting-edge diagnostics and genuine parts to keep your vehicle performing flawlessly.",
     image: "/q-service.png", 
+    href: "/service",
     className: "md:col-span-8 md:row-span-2 min-h-[400px] md:min-h-[600px]" 
   },
   { 
@@ -19,6 +21,7 @@ const services = [
     subtitle: "Stay Connected", 
     desc: "Control your Toyota from your smartwatch or phone. Seamless connectivity, remote immobilization, and instant diagnostics at your fingertips.",
     image: "/i-connect.png", 
+    href: "/i-connect",
     className: "md:col-span-4 md:row-span-1 min-h-[300px]" 
   },
   { 
@@ -27,6 +30,7 @@ const services = [
     subtitle: "Master the Road", 
     desc: "World-class simulator training, comprehensive defensive driving curriculums, and expert instruction.",
     image: "/driving-school.png", 
+    href: "/driving-school",
     className: "md:col-span-4 md:row-span-1 min-h-[300px]" 
   },
   { 
@@ -35,6 +39,7 @@ const services = [
     subtitle: "Complete Peace of Mind", 
     desc: "Comprehensive warranty extensions, tailored maintenance packages, and 24/7 roadside assistance across India.",
     image: "/t-care.png", 
+    href: "/t-care",
     className: "md:col-span-12 md:row-span-1 min-h-[350px] md:min-h-[400px]" 
   }
 ];
@@ -89,8 +94,9 @@ export default function Services() {
               whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
               
               transition={{ duration: 0.8, delay: idx * 0.1, ease: [0.25, 1, 0.5, 1] }}
-              className={`group flex flex-col overflow-hidden bg-zinc-950 border border-white/10 hover:border-white/30 rounded-sm cursor-pointer transition-colors duration-500 ${service.className}`}
+              className={`group relative flex flex-col overflow-hidden bg-zinc-950 border border-white/10 hover:border-white/30 rounded-sm cursor-pointer transition-colors duration-500 ${service.className}`}
             >
+              <Link href={service.href} className="absolute inset-0 z-20" aria-label={`Explore ${service.title}`} />
               {/* Image Header */}
               <div className="relative w-full flex-1 min-h-[250px] md:min-h-[350px] overflow-hidden">
                 <Image 

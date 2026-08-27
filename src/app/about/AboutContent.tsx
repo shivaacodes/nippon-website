@@ -3,17 +3,18 @@
 import { motion } from 'framer-motion';
 import { Calendar, CreditCard, Shield, Gift, ArrowUpRight } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const principals = [
   { name: 'MR. M. A. M. BABU MOOPAN', role: 'DEALER PRINCIPAL', image: '/babu-moopan.jpeg' },
-  { name: 'MR. NAEEM SHAHUL', role: 'DIRECTOR', image: '/naeem-shahul.jpg' },
+  { name: 'MR. NAEEM SHAHUL', role: 'DIRECTOR', image: '/naeem-shahul-nippon.jpeg' },
 ];
 
 const moreItems = [
-  { title: 'EVENTS', image: '/driving-school.jpg', icon: Calendar },
-  { title: 'APPLY FOR LOAN', image: '/whats-new.jpg', icon: CreditCard },
-  { title: 'APPLY FOR INSURANCE', image: '/q-service.jpg', icon: Shield },
-  { title: 'PROMOTIONS', image: '/t-care.webp', icon: Gift },
+  { title: 'EVENTS', href: '/events', image: '/events.png', icon: Calendar },
+  { title: 'APPLY FOR LOAN', href: '/loan', image: '/toyota-financial-service.png', icon: CreditCard },
+  { title: 'APPLY FOR INSURANCE', href: '/insurance', image: '/t-care.png', icon: Shield },
+  { title: 'PROMOTIONS', href: '/promotions', image: '/whats-new.jpg', icon: Gift },
 ];
 
 const fadeUp = {
@@ -155,8 +156,7 @@ export default function AboutContent() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {moreItems.map((item, index) => (
-            <motion.a 
-              href="#"
+            <motion.div
               key={index}
               className="group relative flex flex-col h-[400px] bg-[#f8f8f8] overflow-hidden cursor-pointer"
               initial={{ opacity: 0, y: 30 }}
@@ -164,6 +164,7 @@ export default function AboutContent() {
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
             >
+              <Link href={item.href} className="absolute inset-0 z-20" aria-label={item.title} />
               {/* Image Half */}
               <div className="relative h-[60%] w-full overflow-hidden">
                 <Image 
@@ -187,7 +188,7 @@ export default function AboutContent() {
                   {item.title}
                 </h3>
               </div>
-            </motion.a>
+            </motion.div>
           ))}
         </div>
       </section>

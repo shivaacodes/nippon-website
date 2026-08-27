@@ -1,6 +1,17 @@
 import { create } from 'zustand';
 
-export type LeadIntent = 'TEST_DRIVE' | 'SERVICE' | 'EXCHANGE' | 'BROCHURE' | 'PRICE_LIST' | 'GENERIC';
+export type LeadIntent =
+  | 'TEST_DRIVE'
+  | 'SERVICE'
+  | 'EXCHANGE'
+  | 'BROCHURE'
+  | 'PRICE_LIST'
+  | 'LOAN'
+  | 'INSURANCE'
+  | 'FEEDBACK'
+  | 'CAREERS'
+  | 'PROMOTION'
+  | 'GENERIC';
 
 type LeadStore = {
   isOpen: boolean;
