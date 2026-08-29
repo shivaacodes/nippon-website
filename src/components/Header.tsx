@@ -3,13 +3,16 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { Search, ChevronDown, ChevronRight, Menu, X } from 'lucide-react';
+import SearchOverlay from './site/SearchOverlay';
+import { searchIndex } from '@/data/searchIndex';
 
 export default function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const getLinkClass = (path: string) => {
     const base = "flex items-center transition-colors group";
@@ -32,11 +35,9 @@ export default function Header() {
   ];
 
   return (
-    <motion.header 
-      className="w-full bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-sm border-b border-gray-100"
-      
-    >
-      <div className="flex justify-between items-center px-6 py-4 mx-auto w-full">
+    <>
+    <motion.header className="sticky top-0 z-50 w-full border-b border-black/10 bg-[#f4f4f1]/92 shadow-sm backdrop-blur-md">
+      <div className="mx-auto flex min-h-[68px] w-full items-center justify-between px-5 sm:px-8">
         {/* Left: Logo */}
         <div className="flex items-center">
           <Link href="/">
@@ -50,13 +51,13 @@ export default function Header() {
                 style={{ width: "auto" }}
                 priority
               />
-              <span className="ml-3 font-display font-black text-lg tracking-tight text-black">NIPPON TOYOTA</span>
+              <span className="ml-3 hidden font-display text-sm font-black tracking-[0.12em] text-black sm:block">NIPPON TOYOTA</span>
             </div>
           </Link>
         </div>
 
         {/* Middle: Navigation */}
-        <nav className="hidden lg:flex items-center space-x-8 xl:space-x-10 text-[11px] font-display font-bold text-[#222] tracking-widest">
+        <nav className="hidden items-center gap-7 text-[10px] font-display font-bold tracking-[0.16em] text-[#222] lg:flex xl:gap-9">
           <Link href="/virtual-showroom" className={getLinkClass('/virtual-showroom')}>
             VIRTUAL SHOWROOM
           </Link>
@@ -120,16 +121,13 @@ export default function Header() {
         {/* Right: Search */}
         <div className="flex items-center">
           <div className="hidden lg:block h-6 w-px bg-gray-300 mr-6"></div>
-          <motion.button 
-            className="hidden md:flex items-center text-[11px] font-bold text-[var(--toyota-red)] transition-colors tracking-widest hover:opacity-80"
-            whileHover={{ scale: 1.05 }}
-          >
+          <motion.button type="button" onClick={() => setIsSearchOpen(true)} className="hidden items-center text-[11px] font-bold tracking-widest text-[var(--toyota-red)] transition-opacity hover:opacity-80 md:flex" whileTap={{ scale: 0.98 }}>
             <Search size={18} strokeWidth={2.5} className="mr-2" />
             SEARCH
           </motion.button>
           
           {/* Mobile Menu Toggle */}
-          <button 
+          <button type="button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="lg:hidden p-1 ml-4 text-gray-800 hover:text-[var(--toyota-red)] transition-colors relative z-[60]"
           >
@@ -149,7 +147,7 @@ export default function Header() {
             className="fixed inset-0 z-50 bg-white h-[100dvh] w-full flex flex-col pt-24 pb-8 px-6 overflow-y-auto"
           >
             <nav className="flex flex-col space-y-6 text-lg font-display font-bold text-[#222] tracking-widest">
-              <Link href="/virtual-showroom" onClick={() => setIsMobileMenuOpen(false)} className={getLinkClass('/virtual-showroom')}>
+                <Link href="/virtual-showroom" onClick={() => setIsMobileMenuOpen(false)} className={getLinkClass('/virtual-showroom')}>
                 VIRTUAL SHOWROOM
               </Link>
               <div>
@@ -197,9 +195,7 @@ export default function Header() {
             </nav>
             
             <div className="mt-auto pt-8">
-              <button 
-                className="w-full flex justify-center items-center py-4 bg-gray-50 text-[var(--toyota-red)] font-bold tracking-widest text-sm rounded-xl"
-              >
+              <button type="button" onClick={() => { setIsMobileMenuOpen(false); setIsSearchOpen(true); }} className="flex w-full items-center justify-center rounded-[var(--radius-control)] bg-black/5 py-4 text-sm font-bold tracking-widest text-[var(--toyota-red)]">
                 <Search size={18} strokeWidth={2.5} className="mr-2" />
                 SEARCH
               </button>
@@ -209,5 +205,7 @@ export default function Header() {
       </AnimatePresence>
 
     </motion.header>
+    {isSearchOpen && <SearchOverlay open documents={searchIndex} onClose={() => setIsSearchOpen(false)} />}
+    </>
   );
 }

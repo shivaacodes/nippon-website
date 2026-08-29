@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
@@ -145,11 +145,21 @@ export default function Vehicles() {
   const [activeCar, setActiveCar] = useState(cars[0]);
   const [direction, setDirection] = useState(1);
   const [hasSwiped, setHasSwiped] = useState(false);
+  const modelNavRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const nav = modelNavRef.current;
     const el = document.getElementById(`car-nav-${activeCar.id}`);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    if (!nav || !el) return;
+
+    const navRect = nav.getBoundingClientRect();
+    const itemRect = el.getBoundingClientRect();
+    const edgePadding = 20;
+
+    if (itemRect.left < navRect.left + edgePadding) {
+      nav.scrollBy({ left: itemRect.left - navRect.left - edgePadding, behavior: 'smooth' });
+    } else if (itemRect.right > navRect.right - edgePadding) {
+      nav.scrollBy({ left: itemRect.right - navRect.right + edgePadding, behavior: 'smooth' });
     }
   }, [activeCar.id]);
 
@@ -266,15 +276,16 @@ export default function Vehicles() {
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 relative z-10 w-full">
         
         {/* Sleek Horizontal Model Nav */}
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-16 gap-6 pb-6 relative border-b border-white/20">
-          <div className="shrink-0 xl:mr-8 text-center xl:text-left w-full xl:w-auto">
+        <div className="mb-16 grid grid-cols-1 gap-6 border-b border-white/20 pb-6 xl:grid-cols-[180px_minmax(0,1fr)] xl:items-center">
+          <div className="w-full shrink-0 text-center xl:text-left">
             <h2 className="text-xl md:text-2xl font-display font-bold tracking-[0.3em] uppercase text-white hover:text-white transition-colors duration-1000 ease-out cursor-default py-2">
               Select Model
             </h2>
           </div>
 
-          <div 
-            className="flex overflow-x-auto gap-8 md:gap-12 [&::-webkit-scrollbar]:hidden w-full relative z-50 pointer-events-auto items-center pb-4 pt-2"
+          <div
+            ref={modelNavRef}
+            className="relative z-50 flex min-w-0 w-full items-center gap-8 overflow-x-auto overscroll-x-contain pb-4 pt-2 pointer-events-auto [&::-webkit-scrollbar]:hidden md:gap-12"
           >
             {cars.map((car, idx) => (
               <button
@@ -299,14 +310,14 @@ export default function Vehicles() {
 
         
         {/* The Showroom Stage */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-center relative">
+        <div className="relative grid grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] xl:gap-16">
 
           
           {/* Center Column: The Hero Car with Reflections and Parallax */}
-          <div className="lg:col-span-8 relative h-[250px] sm:h-[350px] lg:h-[500px] xl:h-[600px] flex flex-col items-center justify-center group">
+          <div className="group relative flex min-w-0 flex-col items-center justify-center overflow-visible h-[250px] sm:h-[350px] lg:h-[500px] xl:h-[560px]">
             
             {/* Desktop Navigation Arrows */}
-            <div className="hidden lg:flex absolute inset-y-0 -left-12 -right-12 z-50 items-center justify-between pointer-events-none">
+            <div className="pointer-events-none absolute inset-y-0 -left-4 -right-4 z-50 hidden items-center justify-between lg:flex xl:-left-8 xl:-right-8">
               <button 
                 onClick={handlePrev}
                 className="w-12 h-12 rounded-full border border-white/20 bg-black/50 backdrop-blur-md flex items-center justify-center text-white/50 hover:text-white hover:border-[#eb0a1e] hover:bg-[#eb0a1e]/10 transition-all pointer-events-auto"
@@ -358,7 +369,7 @@ export default function Vehicles() {
                 animate="center"
                 exit="exit"
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                className="absolute inset-0 w-full h-full z-20 scale-110 lg:scale-[1.25] origin-bottom"
+                className="absolute inset-0 z-20 h-full w-full origin-center scale-105 lg:scale-[1.08] xl:scale-[1.14]"
               >
                 {activeCar.image ? (
                   <>
@@ -390,7 +401,7 @@ export default function Vehicles() {
           </div>
 
           {/* Right Column: High-End HUD */}
-          <div className="lg:col-span-3 lg:col-start-10 z-30 lg:-mt-16 xl:-mt-24">
+          <div className="z-30 lg:-mt-16 xl:-mt-24">
             <AnimatePresence mode="popLayout">
               <motion.div
                 key={activeCar.id + "-stats"}

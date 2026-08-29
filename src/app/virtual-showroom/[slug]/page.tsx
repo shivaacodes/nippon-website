@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { notFound, useParams } from 'next/navigation';
+import { notFound, useParams, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,6 +9,9 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { carDetails } from '@/data/carDetails';
 import { useLeadStore } from '@/store/useLeadStore';
+import ConfigurationShare from '@/components/vehicle/ConfigurationShare';
+import InteractiveCarViewer from '@/components/vehicle/InteractiveCarViewer';
+import { configurationUrl } from '@/lib/vehicleConfiguration';
 import {
   ArrowLeft, CheckCircle2, Fuel, Settings2, ChevronDown,
   ChevronRight, Zap, PhoneCall, X
@@ -23,13 +26,20 @@ const badgeColors: Record<string, string> = {
 
 export default function CarDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const slug = typeof params?.slug === 'string' ? params.slug : '';
   const car = carDetails[slug];
 
   const { openModal } = useLeadStore();
   const [activeTab, setActiveTab] = useState("Overview");
-  const [selectedColor, setSelectedColor] = useState(0);
-  const [selectedVariant, setSelectedVariant] = useState(0);
+  const [selectedColor, setSelectedColor] = useState(() => {
+    const index = car?.colors.findIndex((item) => item.id === searchParams.get('colour')) ?? -1;
+    return index >= 0 ? index : 0;
+  });
+  const [selectedVariant, setSelectedVariant] = useState(() => {
+    const index = car?.variants.findIndex((item) => item.id === searchParams.get('variant')) ?? -1;
+    return index >= 0 ? index : 0;
+  });
   const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [showTip, setShowTip] = useState(true);
@@ -38,6 +48,7 @@ export default function CarDetailPage() {
 
   const currentVariant = car.variants[selectedVariant];
   const activeColor = car.colors[selectedColor];
+  const currentConfiguration = { slug: car.slug, color: activeColor?.id, variant: currentVariant?.id };
 
   return (
     <div className="flex min-h-screen flex-col font-sans bg-[#080808]">
@@ -60,18 +71,8 @@ export default function CarDetailPage() {
           transition={{ duration: 0.5 }}
           className="absolute inset-0 flex items-center justify-center px-6"
         >
-          <div className="relative w-full max-w-4xl h-[45vh] sm:h-[55vh]">
-            <Image
-              src={car.image}
-              alt={car.name}
-              fill
-              priority
-              sizes="100vw"
-              className="object-contain drop-shadow-[0_40px_70px_rgba(0,0,0,0.85)]"
-            />
-            <div className="absolute top-[88%] left-0 right-0 h-24 scale-y-[-1] opacity-[0.08] [mask-image:linear-gradient(to_bottom,black,transparent_60%)]">
-              <Image src={car.image} alt="" fill sizes="100vw" className="object-contain" />
-            </div>
+          <div className="relative h-[45vh] w-full max-w-4xl sm:h-[55vh]">
+            <InteractiveCarViewer key={car.slug} image={car.image} alt={car.name} modelSlug={car.slug} showroomHref="/virtual-showroom" />
           </div>
         </motion.div>
 
@@ -150,7 +151,14 @@ export default function CarDetailPage() {
         </div>
 
         {/* CTA row, bottom-right — matches "Book a Test Drive" / "Configure & Book Online" */}
-        <div className="absolute bottom-5 right-5 z-20 flex gap-3">
+        <div className="absolute bottom-5 right-5 z-20 flex max-w-[calc(100%-2.5rem)] flex-wrap justify-end gap-3">
+          <ConfigurationShare configuration={currentConfiguration} />
+          <Link
+            href={configurationUrl(currentConfiguration)}
+            className="hidden items-center gap-2 rounded-lg border border-white/20 bg-white/[0.08] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.15em] text-white hover:bg-white/[0.14] sm:flex"
+          >
+            Save setup
+          </Link>
           <button
             onClick={() => openModal(car.name, 'TEST_DRIVE')}
             className="flex items-center gap-2 bg-white text-black px-5 py-3 rounded-lg font-bold text-[11px] tracking-[0.15em] uppercase hover:bg-zinc-200 transition-colors"

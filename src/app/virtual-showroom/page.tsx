@@ -4,9 +4,13 @@ import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import PannellumViewer from '@/components/PannellumViewer';
 import showroomData from '../../../public/showroom-data.json';
+import Link from 'next/link';
+import { ArrowLeft, ChevronRight, Info, Menu, X } from 'lucide-react';
 
 type ShowroomCar = {
   id: string;
+  modelName: string;
+  modelCategory: string;
   topHeading: string;
   startingPrice: string;
   takeTour: string;
@@ -45,11 +49,20 @@ function tourUrl(car: ShowroomCar) {
   return `/virtual-showroom/${car.takeTour}`;
 }
 
+function cleanDisplayText(value: string) {
+  return cleanPrice(value)
+    .replace(/\u00e2\u201a\u00b9|\u00c3\u00a2\u00e2\u20ac\u0161\u00c2\u00b9/g, '\u20b9')
+    .replace(/\u00e2\u201e\u00a2|\u00c3\u00a2\u00e2\u20ac\u017e\u00c2\u00a2/g, 'TM')
+    .replace(/\u00e2\u20ac\u0093|\u00c3\u00a2\u00e2\u20ac\u201c/g, '-')
+    .replace(/\u00e2\u20ac\u009d|\u00c3\u00a2\u00e2\u20ac\u00c2\u009d/g, '"')
+    .replace(/\u00c2\u00b0/g, String.fromCharCode(0x00b0))
+    .replace(/\u00c2\u00b0/g, '°');
+}
+
 export default function VirtualShowroom() {
   const [entered, setEntered] = useState(false);
-  const [tutorialStep, setTutorialStep] = useState<0 | 1 | 2>(0);
-  const [activeTab, setActiveTab] = useState('CARS');
   const [activeCar, setActiveCar] = useState<ShowroomCar | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const viewerConfig = useMemo(() => ({
     default: {
@@ -112,18 +125,14 @@ export default function VirtualShowroom() {
     },
   }), []);
 
-  const moveTo = (tab: string, yaw: number) => {
-    setActiveTab(tab);
-    window.virtualShowroomViewer?.setYaw?.(yaw);
-  };
+  const selectedFeatures = activeCar?.content[0]?.contentList.map(cleanDisplayText) ?? [];
 
   const stepInside = () => {
     setEntered(true);
-    setTutorialStep(1);
   };
 
   return (
-    <main className="relative h-screen w-screen overflow-hidden bg-black font-sans text-white">
+    <main className="relative h-[100dvh] w-screen overflow-hidden bg-black font-sans text-white">
       <link rel="stylesheet" href="https://static3.toyotabharat.com/assets/toyota-360/css/showroom.css" />
       <style
         dangerouslySetInnerHTML={{
@@ -168,11 +177,78 @@ export default function VirtualShowroom() {
               font: 800 13px Arial, sans-serif;
               white-space: nowrap;
             }
+            .nippon-info-hotspot,
+            .nippon-tour-hotspot { cursor: pointer; transition: box-shadow 180ms ease-out, filter 180ms ease-out; }
             .nippon-info-hotspot:hover,
-            .nippon-tour-hotspot:hover { transform: scale(1.04); }
+            .nippon-tour-hotspot:hover { filter: brightness(1.08); box-shadow: 0 8px 20px rgba(237,27,47,.35) !important; }
+            .nippon-tour-hotspot:hover::after { letter-spacing: .02em; }
+            .showroom-control { transition: background-color 180ms ease-out, border-color 180ms ease-out, transform 160ms ease-out; }
+            .showroom-control:active { transform: scale(.98); }
+            .showroom-control:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+            .showroom-vehicle-cta { font-size: 0 !important; }
+            .showroom-vehicle-cta::before { content: 'View vehicle'; font-size: 10px; }
+            @media (prefers-reduced-motion: reduce) {
+              .showroom-control { transition: none; }
+              .nippon-info-hotspot,
+              .nippon-tour-hotspot { transition: none; }
+              .nippon-info-hotspot:hover,
+              .nippon-tour-hotspot:hover { transform: none; }
+            }
           `,
         }}
       />
+
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-36 bg-gradient-to-b from-black/75 via-black/25 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-48 bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
+
+      <header className="absolute inset-x-0 top-0 z-40 border-b border-white/10 bg-black/25 backdrop-blur-md">
+        <div className="mx-auto flex h-[68px] max-w-[1560px] items-center justify-between px-4 sm:px-7">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-5">
+            <Link href="/" className="showroom-control flex shrink-0 items-center gap-2 rounded-md px-1 py-1" aria-label="Back to Nippon Toyota home">
+              <Image src="/nippon-toyota.png" alt="Nippon Toyota" width={140} height={32} className="h-7 w-auto object-contain brightness-0 invert" priority />
+              <span className="hidden border-l border-white/25 pl-4 text-[10px] font-bold uppercase tracking-[0.24em] text-white/75 sm:block">Nippon Toyota</span>
+            </Link>
+            <span className="hidden h-5 w-px bg-white/20 md:block" />
+            <span className="hidden text-[10px] font-semibold uppercase tracking-[0.2em] text-white/65 md:block">Virtual showroom</span>
+          </div>
+
+          <nav className="hidden items-center gap-7 lg:flex" aria-label="Showroom navigation">
+            <Link href="/" className="showroom-control text-[10px] font-bold uppercase tracking-[0.18em] text-white/75 hover:text-white">Home</Link>
+            <Link href="/service" className="showroom-control text-[10px] font-bold uppercase tracking-[0.18em] text-white/75 hover:text-white">Services</Link>
+            <Link href="/about" className="showroom-control text-[10px] font-bold uppercase tracking-[0.18em] text-white/75 hover:text-white">About</Link>
+            <Link href="/contact" className="showroom-control rounded-full border border-white/35 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-white hover:border-white hover:bg-white/10">Contact</Link>
+          </nav>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link href="/" className="showroom-control hidden items-center gap-2 rounded-full border border-white/25 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.15em] text-white/80 hover:border-white hover:bg-white/10 sm:flex">
+              <ArrowLeft size={13} /> Exit showroom
+            </Link>
+            <button type="button" onClick={() => setMobileMenuOpen((open) => !open)} className="showroom-control flex h-10 w-10 items-center justify-center rounded-full border border-white/25 bg-black/20 text-white hover:bg-white/10 lg:hidden" aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileMenuOpen}>
+              {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {mobileMenuOpen && (
+        <nav className="absolute inset-x-3 top-[80px] z-40 rounded-2xl border border-white/15 bg-[#101010]/95 p-4 shadow-2xl backdrop-blur-xl lg:hidden" aria-label="Mobile showroom navigation">
+          <div className="flex flex-col gap-1">
+            {[
+              ['Home', '/'],
+              ['Services', '/service'],
+              ['About', '/about'],
+              ['Contact', '/contact'],
+            ].map(([label, href]) => (
+              <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)} className="showroom-control rounded-xl px-4 py-3 text-sm font-semibold text-white/80 hover:bg-white/10 hover:text-white">
+                {label}
+              </Link>
+            ))}
+            <Link href="/" onClick={() => setMobileMenuOpen(false)} className="showroom-control mt-2 flex items-center gap-2 border-t border-white/10 px-4 pt-4 text-sm font-semibold text-white/80 hover:text-white">
+              <ArrowLeft size={15} /> Exit showroom
+            </Link>
+          </div>
+        </nav>
+      )}
 
       {entered && (
         <PannellumViewer config={viewerConfig} id="panorama" className="h-full w-full" />
@@ -189,93 +265,53 @@ export default function VirtualShowroom() {
             priority
           />
           <div className="absolute inset-0 bg-black/20" />
-          <div className="absolute bottom-[6%] left-1/2 w-[min(92vw,450px)] -translate-x-1/2 text-left md:bottom-[9%]">
-            <h1 className="font-serif text-[31px] font-bold leading-none text-white">Hello!</h1>
-            <p className="mt-6 text-[18px] font-semibold text-white">Welcome to the Toyota Virtual Showroom.</p>
+          <div className="absolute bottom-[7%] left-1/2 w-[min(92vw,520px)] -translate-x-1/2 text-left md:bottom-[10%]">
+            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/70">Toyota virtual showroom</p>
+            <h1 className="mt-3 text-[clamp(2rem,5vw,4rem)] font-black leading-none tracking-[-0.04em] text-white">Explore the Toyota range</h1>
+            <p className="mt-4 max-w-md text-base leading-6 text-white/80">Step inside, look around, and choose a model to explore in 360°.</p>
             <button
               type="button"
               onClick={stepInside}
-              className="mt-7 h-[58px] w-full bg-[#ed1b2f] font-serif text-[14px] font-bold uppercase text-white transition-colors hover:bg-[#c90013]"
+              className="showroom-control mt-7 flex h-12 w-full items-center justify-center bg-[#ed1b2f] text-[11px] font-bold uppercase tracking-[0.18em] text-white hover:bg-[#c90013] sm:w-64"
             >
-              STEP INSIDE
+              Enter showroom <ChevronRight size={15} className="ml-2" />
             </button>
           </div>
         </section>
       )}
 
-      {entered && tutorialStep === 1 && (
-        <div className="absolute left-1/2 top-1/2 z-20 w-[330px] -translate-x-1/2 -translate-y-1/2 bg-white px-4 py-4 text-black shadow-2xl">
-          <h2 className="text-[18px] font-black"><span className="mr-2">1/2.</span> Explore Showroom</h2>
-          <p className="mt-3 text-[16px] leading-6">Drag left/right to rotate & explore the showroom.</p>
-          <div className="mt-3 flex justify-end gap-5 text-[15px] font-bold text-[#ed1b2f]">
-            <button type="button" onClick={() => setTutorialStep(0)}>SKIP</button>
-            <button type="button" onClick={() => setTutorialStep(2)}>NEXT</button>
-          </div>
-        </div>
-      )}
-
-      {entered && tutorialStep === 2 && (
-        <div className="absolute bottom-[110px] left-1/2 z-20 w-[330px] -translate-x-1/2 bg-white px-4 py-4 text-black shadow-2xl">
-          <h2 className="text-[18px] font-black"><span className="mr-2">2/2.</span> Tab Bar</h2>
-          <p className="mt-3 text-[16px] leading-6">Or tap on these tabs to quickly view a preferred Car category.</p>
-          <div className="mt-3 flex justify-end gap-5 text-[15px] font-bold text-[#ed1b2f]">
-            <button type="button" onClick={() => setTutorialStep(1)}>REPEAT</button>
-            <button type="button" onClick={() => setTutorialStep(0)}>DONE</button>
-          </div>
-        </div>
-      )}
-
-      {entered && (
-        <div className="absolute bottom-7 left-1/2 z-10 -translate-x-1/2 bg-white px-5 py-3 text-black shadow-xl">
-          <div className="flex items-center gap-4">
-            <span className="text-[14px] font-bold">Move to:</span>
-            <div className="flex overflow-hidden border border-[#ddd]">
-              {[
-                ['CARS', 28],
-                ['MPV', 84],
-                ['SUV', -116],
-              ].map(([tab, yaw]) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => moveTo(String(tab), Number(yaw))}
-                  className={`px-7 py-3 text-[13px] font-bold ${activeTab === tab ? 'bg-[#ed1b2f] text-white' : 'bg-white text-black'}`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       {activeCar && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/55 px-4">
-          <div className="relative w-full max-w-[520px] bg-white px-8 py-9 text-black shadow-2xl">
+        <section className="absolute inset-x-0 bottom-4 z-40 px-3 sm:bottom-7 sm:px-7" aria-live="polite" aria-label={`${activeCar.modelName} details`}>
+          <div className="relative mx-auto flex max-w-[1560px] flex-col gap-5 rounded-2xl border border-white/20 bg-[#101010]/95 p-5 text-white shadow-2xl backdrop-blur-xl sm:flex-row sm:items-end sm:justify-between sm:p-6">
             <button
               type="button"
               aria-label="Close"
               onClick={() => setActiveCar(null)}
-              className="absolute right-5 top-4 text-3xl leading-none text-black"
+              className="showroom-control absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/70 hover:bg-white/10 hover:text-white"
             >
-              x
+              <X size={16} />
             </button>
-            <h2 className="text-[26px] font-black uppercase">{activeCar.topHeading}</h2>
-            <p className="mt-3 text-[16px] font-bold">Starting Price: {cleanPrice(activeCar.startingPrice)}</p>
-            <h3 className="mt-7 text-[15px] font-black uppercase">Top Highlights</h3>
-            <ul className="mt-4 list-disc space-y-2 pl-5 text-[15px] leading-6 text-[#444]">
-              {activeCar.content[0]?.contentList.map((feature) => (
+            <div className="min-w-0 pr-8">
+              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#ed1b2f]"><Info size={13} /> Selected vehicle</div>
+              <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.02em] sm:text-3xl">{activeCar.topHeading}</h2>
+              <p className="mt-2 text-sm font-semibold text-white/65">Starting from {cleanDisplayText(activeCar.startingPrice)}</p>
+              <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-white/70">
+              <ul className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-white/70">
+              {selectedFeatures.map((feature) => (
                 <li key={feature}>{feature.replace('â„¢', 'TM').replace('â€', '"')}</li>
               ))}
             </ul>
+            </div>
             <a
               href={tourUrl(activeCar)}
-              className="mt-7 inline-flex bg-[#ed1b2f] px-8 py-4 text-[13px] font-black uppercase text-white hover:bg-[#c90013]"
+              aria-label={`View ${activeCar.modelName}`}
+              className="showroom-control showroom-vehicle-cta inline-flex shrink-0 items-center justify-center bg-[#ed1b2f] px-6 py-3.5 text-[10px] font-black uppercase tracking-[0.18em] text-white hover:bg-[#c90013]"
             >
               TAKE 360° TOUR
             </a>
           </div>
         </div>
+        </section>
       )}
     </main>
   );

@@ -29,12 +29,12 @@ const bebas = Bebas_Neue({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  colorScheme: "dark",
+  colorScheme: "light",
+  themeColor: "#f4f4f1",
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.nippon-toyota.com"),
   title: "Nippon Toyota | Official Toyota Dealer in Kerala",
   description: "Welcome to Nippon Toyota. Explore the latest Toyota cars, book a test drive, and get the best deals on your next vehicle in Kerala.",
   keywords: ["Toyota", "Nippon Toyota", "Toyota Dealer Kerala", "Fortuner", "Innova", "Buy Toyota"],
